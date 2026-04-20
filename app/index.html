@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dApp To-Do List (Solana)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#9945ff" />
+              <stop offset="100%" stop-color="#14f195" />
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#logoGrad)" />
+          <path d="M12 20.5 L18 26 L28 14" stroke="#0f1117" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        </svg>
+        <div class="logo-text">
+          <h1>SolDo</h1>
+          <p class="subtitle">On-chain to-do &middot; Solana</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button
+        id="theme-toggle"
+        class="icon-btn"
+        title="Toggle theme"
+        aria-label="Toggle theme"
+      >
+        <span class="theme-icon theme-icon-dark">&#9790;</span>
+        <span class="theme-icon theme-icon-light">&#9728;</span>
+      </button>
+
+      <div class="wallet-menu">
+        <button id="wallet-btn" class="btn btn-primary">Connect Wallet</button>
+        <div id="wallet-dropdown" class="wallet-dropdown hidden" role="menu">
+          <!-- Disconnected state: wallet picker -->
+          <div id="wallet-picker" class="dropdown-section">
+            <div class="dropdown-title">Choose Wallet</div>
+            <button class="wallet-option" data-wallet="phantom">
+              <span class="wallet-dot phantom-dot"></span>
+              <span>Phantom</span>
+              <span class="wallet-status" id="phantom-status">Detect…</span>
+            </button>
+          </div>
+          <!-- Connected state: account info + actions -->
+          <div id="wallet-account" class="dropdown-section hidden">
+            <div class="dropdown-title">Connected</div>
+            <div class="account-row">
+              <span class="wallet-dot"></span>
+              <span id="wallet-address-full" class="mono"></span>
+            </div>
+            <div class="account-balance">
+              <span class="balance-label">Balance</span>
+              <span id="wallet-balance">— SOL</span>
+            </div>
+            <div class="dropdown-actions">
+              <button class="btn-ghost btn-small" id="copy-addr-btn">
+                &#128203; Copy
+              </button>
+              <button class="btn-ghost btn-small" id="explorer-btn">
+                &#128279; Explorer
+              </button>
+              <button class="btn-ghost btn-small" id="airdrop-btn" title="Airdrop 2 SOL (localnet only)">
+                &#9992; Airdrop
+              </button>
+            </div>
+            <button class="btn-danger btn-small btn-full" id="disconnect-btn">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Progress / Overview -->
+    <section class="card overview hidden" id="overview-section">
+      <div class="overview-row">
+        <div class="stat">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-done">0</div>
+          <div class="stat-label">Done</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value stat-warn" id="stat-overdue">0</div>
+          <div class="stat-label">Overdue</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label" id="progress-label">0% complete</div>
+    </section>
+
+    <!-- Add Task Form -->
+    <section class="card" id="add-section">
+      <h2>Add New Task</h2>
+      <form id="task-form">
+        <div class="form-row">
+          <input
+            type="text"
+            id="task-content"
+            placeholder="What needs to be done?"
+            maxlength="100"
+            required
+          />
+        </div>
+        <div class="form-row form-meta">
+          <div class="form-group">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority">
+              <option value="1">Low</option>
+              <option value="2" selected>Medium</option>
+              <option value="3">High</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-deadline">Deadline (optional)</label>
+            <input type="datetime-local" id="task-deadline" />
+          </div>
+          <button type="submit" class="btn btn-primary" id="add-btn" disabled>
+            + Add Task
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- View Switcher + Tasks -->
+    <section class="card" id="tasks-section">
+      <div class="tasks-header">
+        <div class="view-tabs">
+          <button class="view-tab active" data-view="list">&#9776; List</button>
+          <button class="view-tab" data-view="table">&#8942;&#8942; Table</button>
+          <button class="view-tab" data-view="calendar">&#128197; Calendar</button>
+        </div>
+        <div class="filter-row">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="active">Active</button>
+          <button class="filter-btn" data-filter="completed">Done</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Search tasks..."
+        />
+        <select id="sort-select" class="sort-select">
+          <option value="priority">Sort: Priority</option>
+          <option value="deadline">Sort: Deadline</option>
+          <option value="created">Sort: Newest</option>
+          <option value="alpha">Sort: A-Z</option>
+        </select>
+      </div>
+
+      <div id="connect-prompt" class="empty-state">
+        <p>&#128274; Connect Phantom to view your tasks.</p>
+      </div>
+
+      <div id="loading" class="empty-state hidden">
+        <div class="spinner"></div>
+        <p>Loading tasks from Solana...</p>
+      </div>
+
+      <div id="no-account" class="empty-state hidden">
+        <p>&#9889; You don't have a task list account yet.</p>
+        <button id="init-btn" class="btn btn-primary" style="margin-top: 1rem;">
+          Create Task List
+        </button>
+      </div>
+
+      <div id="empty-tasks" class="empty-state hidden">
+        <p>&#128203; No tasks match. Add one above or clear filters.</p>
+      </div>
+
+      <!-- List view -->
+      <ul id="task-list" class="task-list hidden"></ul>
+
+      <!-- Table view -->
+      <div id="task-table-wrap" class="table-wrap hidden">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Task</th>
+              <th>Priority</th>
+              <th>Deadline</th>
+              <th>Created</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="task-table-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Calendar view -->
+      <div id="calendar-view" class="calendar hidden">
+        <div class="calendar-header">
+          <button id="cal-prev" class="btn btn-ghost">&#8249;</button>
+          <div id="cal-month" class="cal-month">—</div>
+          <button id="cal-next" class="btn btn-ghost">&#8250;</button>
+        </div>
+        <div class="calendar-weekdays">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+          <div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div id="calendar-grid" class="calendar-grid"></div>
+        <div id="calendar-day-tasks" class="calendar-day-tasks hidden"></div>
+      </div>
+    </section>
+
+    <div id="status-bar" class="status-bar hidden">
+      <span id="status-msg"></span>
+    </div>
+  </main>
+
+  <footer>
+    <span>Network: <strong id="network-name">—</strong></span>
+    <span>Program: <strong id="program-addr">—</strong></span>
+  </footer>
+
+  <template id="task-template">
+    <li class="task-item">
+      <label class="task-check">
+        <input type="checkbox" class="task-checkbox" />
+        <span class="checkmark"></span>
+      </label>
+      <div class="task-body">
+        <span class="task-content"></span>
+        <div class="task-meta">
+          <span class="priority-badge"></span>
+          <span class="task-deadline"></span>
+          <span class="task-date"></span>
+        </div>
+      </div>
+      <button class="btn btn-delete" title="Delete task">&#128465;</button>
+    </li>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

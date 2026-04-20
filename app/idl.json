@@ -1,0 +1,341 @@
+{
+  "address": "8cBBt1yhJFW2hvQNTTHxf6t6Vntvo2Stizmt6GPD8Y1p",
+  "metadata": {
+    "name": "todo_dapp_solana",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "create_task",
+      "discriminator": [
+        194,
+        80,
+        6,
+        180,
+        232,
+        127,
+        48,
+        171
+      ],
+      "accounts": [
+        {
+          "name": "user_tasks",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  45,
+                  116,
+                  97,
+                  115,
+                  107,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "name": "priority",
+          "type": "u8"
+        },
+        {
+          "name": "deadline",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "delete_task",
+      "discriminator": [
+        112,
+        220,
+        10,
+        109,
+        3,
+        168,
+        46,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "user_tasks",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  45,
+                  116,
+                  97,
+                  115,
+                  107,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "task_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_user",
+      "discriminator": [
+        111,
+        17,
+        185,
+        250,
+        60,
+        122,
+        38,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "user_tasks",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  45,
+                  116,
+                  97,
+                  115,
+                  107,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "toggle_complete",
+      "discriminator": [
+        67,
+        212,
+        58,
+        191,
+        149,
+        34,
+        149,
+        208
+      ],
+      "accounts": [
+        {
+          "name": "user_tasks",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  45,
+                  116,
+                  97,
+                  115,
+                  107,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "task_id",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "UserTasks",
+      "discriminator": [
+        24,
+        77,
+        107,
+        103,
+        207,
+        237,
+        209,
+        227
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "EmptyContent",
+      "msg": "Task content cannot be empty"
+    },
+    {
+      "code": 6001,
+      "name": "ContentTooLong",
+      "msg": "Task content is too long"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidPriority",
+      "msg": "Priority must be 1 (low), 2 (medium), or 3 (high)"
+    },
+    {
+      "code": 6003,
+      "name": "TaskNotFound",
+      "msg": "Task not found"
+    },
+    {
+      "code": 6004,
+      "name": "TooManyTasks",
+      "msg": "You have reached the maximum number of tasks"
+    },
+    {
+      "code": 6005,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    }
+  ],
+  "types": [
+    {
+      "name": "Task",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "name": "completed",
+            "type": "bool"
+          },
+          {
+            "name": "priority",
+            "type": "u8"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserTasks",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "next_id",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "tasks",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Task"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
